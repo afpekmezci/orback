@@ -1,0 +1,42 @@
+{% extends "partial/base.html" %}
+
+{% block context %}
+
+    <table style="margin-bottom: 48px; width: 100%;" cellpadding="0" cellspacing="0" role="presentation">
+      <tr>
+        <td class="dark-mode-bg-gray-989 dark-mode-text-gray-979 sm-px-24"
+          style="background-color: #ffffff; padding: 48px; text-align: left; font-size: 16px; line-height: 24px; color: #1f2937;">
+          <p class="sm-leading-32 dark-mode-text-white"
+            style="margin: 0; margin-bottom: 36px; font-family: ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif; font-size: 24px; font-weight: 600; color: #000000;">
+            Sayın <b>{{name}}</b>
+          </p>
+          <p style="margin: 0; margin-bottom: 24px;">
+            Orbon'a hoşgelidniz. Aşağıdaki giriş bilgileri ile oturum açabilirsiniz.
+          </p>
+          <span class="hover-bg-blue-600"
+            style="display: inline-block; background-color: #ff5a26; padding-left: 24px; padding-right: 24px; padding-top: 16px; padding-bottom: 16px; text-align: center; font-size: 16px; font-weight: 600;  color: #ffffff; text-decoration: none;">
+
+                <span style="mso-text-raise: 16px; color: white; text-decoration: none">E-Posta : <b>{{mail}}</b></span>
+                <span style="mso-text-raise: 16px">Şifre : {{password}}</span>
+
+          </span>
+
+          </td>
+      </tr>
+    </table>
+
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
