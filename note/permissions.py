@@ -23,27 +23,14 @@ def get_model_name(request, view):
 
 def get_object_id(request, view):
     """as_view ile verilen veya POST içindeki data da object_id'i alır."""
-    return (
-        view.kwargs[view.id_field_name]
-        if hasattr(view, "id_field_name") and view.id_field_name
-        else request.POST.get("object_id")
-    )
+    return view.id_field_name if hasattr(view, "id_field_name") else request.POST.get("object_id")
 
 
 class MainPermission(permissions.BasePermission):
     """genel permission'ı kontrol eder, her istekte çalışır."""
 
     def has_permission(self, request, view):
-        """
-
-        try:
-            get_organization_details(request, Note)
-        except Exception as e:
-            self.message = e
-            return False
-        else:
-            return True
-        """
+        return True if request.org is not None else False
     def has_object_permission(self, request, view, obj):
         return self.has_permission(request, view)
 

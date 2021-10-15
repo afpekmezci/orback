@@ -82,7 +82,6 @@ class NoteSerializer(serializers.ModelSerializer):
             "created_by_id",
             "title",
             "note",
-            "is_public",
             "file",
             "created_time",
             "can_edit",

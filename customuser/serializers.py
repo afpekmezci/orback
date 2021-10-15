@@ -40,8 +40,8 @@ class UserSerializer(serializers.ModelSerializer):
 		data = super(UserSerializer, self).to_representation(instance)
 
 		organizations = get_organization_list(instance)
-
 		if self.password_change:
+
 			refresh = self.get_token(instance)
 			data['token'] = {
 				'refresh': str(refresh),
@@ -85,8 +85,6 @@ class ResetPasswordSerializer(serializers.Serializer):
 	def update(self, instance, validated_data):
 
 		instance.user.set_password(validated_data.get('password'))
-		instance.user.name = 'changed name'
-		print('USER : ', instance.user)
 		instance.user.save()
 		instance.is_active = False
 
@@ -129,7 +127,6 @@ class TokenRefreshPatchedSerializerForWeb(TokenRefreshSerializer):
 	token = serializers.JSONField(required=False)
 
 	def validate(self, attrs):
-		print('attrs : ',attrs)
 		refresh = {"refresh": attrs["token"]["refresh_token"]}
 		data = super().validate(refresh)
 		_access_token = data["access"]

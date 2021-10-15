@@ -34,9 +34,10 @@ class DataWithRequiredFieldMixin:
     app_label = None
     model_name = None
     id_field_name = None
-    is_file=True
+    is_file = False
     def get_serializer(self, *args, **kwargs):
-        data = kwargs["data"].copy()
+        print('KWARGS : ')
+        data = {}
         data["app_label"] = self.app_label or kwargs["data"]["app_label"]
         data["model_name"] = self.model_name or kwargs["data"]["model_name"]
         data["object_id"] = (
@@ -44,18 +45,16 @@ class DataWithRequiredFieldMixin:
             if self.id_field_name
             else kwargs["data"]["object_id"]
         )
-        kwargs["data"] = data
+        kwargs["data"] = {*kwargs.get('data', {}),*data}
         return super().get_serializer(*args, **kwargs)
 
 
 class NoteCreateView(DataWithRequiredFieldMixin, CreateAPIView):
     permission_classes = [
         IsAuthenticated,
-        MainPermission,
-        RequiredFieldCheckPermission,
+        MainPermission
     ]
     serializer_class = NoteSerializer
-
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context["detay"] = False
@@ -70,7 +69,7 @@ class NoteUpdateViewSet(DataWithRequiredFieldMixin, UpdateAPIView):
     ]
     serializer_class = NoteSerializer
     queryset = Note.objects.all()
-    lookup_field = "id"
+    lookup_field = "pk"
     lookup_url_kwarg = "note_id"
 
     def get_serializer_context(self):
@@ -87,7 +86,7 @@ class NoteDeleteViewSet(DataWithRequiredFieldMixin, UpdateAPIView):
     ]
     serializer_class = NoteSerializer
     queryset = Note.objects.all()
-    lookup_field = "id"
+    lookup_field = "pk"
     lookup_url_kwarg = "note_id"
 
     def get_serializer_context(self):
@@ -105,7 +104,7 @@ class NoteDetailView(RetrieveAPIView):
     is_file=False
     serializer_class = NoteSerializer
     queryset = Note.objects.all()
-    lookup_field = "id"
+    lookup_field = "pk"
     lookup_url_kwarg = "note_id"
     http_method_names = ["post"]
 

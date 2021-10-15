@@ -3,7 +3,8 @@ from customuser.views import (
 	UserDetailView,
 	ForgetPasswordView,
 	ResetPasswordView,
-	ChangePasswordView
+	UserUpdateView,
+	UserLogoutView
 )
 from note.viewsets import (
 	NoteListView,
@@ -25,8 +26,9 @@ note_urls = [
 
 
 urlpatterns = [
-	path("", UserDetailView.as_view(), name="user_detail"),
+	path("detail/", UserDetailView.as_view(), name="UserDetail"),
 	path("forget/", ForgetPasswordView.as_view(), name="ForgetRequet"),
 	path("reset/", ResetPasswordView.as_view(), name="ResetPassword"),
-	path("change/", ChangePasswordView.as_view(), name="ChangePassword"),
+	path("update/", UserUpdateView.as_view(), name="ChangePassword"),
+	path("logout/", UserLogoutView.as_view(), name="Logout")
 ]

@@ -4,6 +4,25 @@ import base64
 import mimetypes
 from uuid import uuid4
 
+import pytz
+from pytz import timezone
+import time
+from datetime import datetime, timedelta
+
+class TimeUtils:
+
+	def recalculate_time_wtih_tz(self, stamp, zone=None):
+		if not zone:
+			zone = "Europe/Istanbul"
+		utc = pytz.timezone("UTC")
+		as_date = datetime.fromtimestamp(stamp)
+		aware_date = utc.localize(as_date)
+		turkey = timezone(zone)
+		now_turkey = aware_date.astimezone(turkey)
+		return now_turkey
+
+
+
 def get_upload_path(instance, path):
 	app_name = instance._meta.app_label
 	# apas_id=instance.get_full_name

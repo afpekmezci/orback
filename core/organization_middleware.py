@@ -3,7 +3,10 @@ from datetime import datetime
 from django.utils.functional import SimpleLazyObject
 from django.contrib.auth.middleware import get_user
 from rest_framework_simplejwt.authentication import JWTAuthentication, AuthenticationFailed
-from django.core.exceptions import ValidationError
+from django.core.exceptions import PermissionDenied
+from core import settings
+from organization.utils import get_main_org
+from django.contrib.auth.mixins import PermissionRequiredMixin
 
 class OrganizationDetailMiddleware:
 	"""
@@ -16,25 +19,32 @@ class OrganizationDetailMiddleware:
 
 	def get_organization_info_from_header(self, request):
 		# 1. Gelen Request'in header'inden Organizasyon Bilgisi Alınır.
-		_org = None
 		try:
 			orginfo = request.headers["Organization"].split("ORG")  # ORG1 şeklide bir verinin gelmesi beklenir.
-
 			if len(orginfo) < 2:
 				raise _header_error
-			_org = orginfo[1]
+			org_id = orginfo[1]
 		except:
-			_org = 1
-		try:
-			_org = int(_org)
-		except ValueError:
-			return None
+			org_id = None
+		if org_id:
+			try:
+				org_id = int(org_id)
+			except ValueError:
+				return None
+
 		# 2. Header'dan gelen organizasyon id'si ile, organizasyon bulunur.
-		try:
-			_org = Organization.objects.get(id__exact=_org)
-		except Organization.DoesNotExist:
-			raise ValidationError('org header error')
-		request.org = _org
+		org = None
+		if settings.DEBUG and request.user.is_staff:
+			org = get_main_org()
+		elif settings.DEBUG and request.user.is_staff is False and org_id is None:
+			org = Organization.objects.filter(user_organizatons__user__in=[request.user]).first()
+		else:
+			if request.user:
+				try:
+					org = Organization.objects.filter(user_organizatons__user__in=[request.user]).get(id__exact=org_id)
+				except Organization.DoesNotExist:
+					raise PermissionDenied('ORG HEADER ERROR')
+		request.org = org
 
 	def get_organization_user(self, request):
 		org_user = None

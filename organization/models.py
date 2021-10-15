@@ -2,13 +2,19 @@ from django.db import models
 from base.models import BaseModel
 from core.settings import AUTH_USER_MODEL
 from django.utils.translation import gettext as _
-from organization.utils import send_invitation_mail
+from organization.mails import send_invitation_mail
+from base.managers import BaseManager
+from files.models import BaseFileModel
 
+class OrganizationManager(BaseManager):
+	pass
 
 class Organization(BaseModel):
 
 	name = models.CharField(verbose_name=_('Company Name'), max_length=128)
 	city = models.CharField(verbose_name=_('City'), blank=True, null=True, max_length=64)
+	main_organization = models.BooleanField(default=False, verbose_name='main org')
+	objects = BaseManager()
 
 	def __str__(self):
 		return f"{self.name} ({self.city if self.city is not None else ''})"
@@ -78,17 +84,27 @@ class Organization(BaseModel):
 		self.owner.organization_user = new_owner
 		self.owner.save()
 
+	def is_employee(self, user):
+		return True if OrganizationUser.objects.filter(organization=self,user__in=[user]) else False
+
 	def is_admin(self, user):
-		"""
-		Returns True is user is an admin in the organization, otherwise false
-		"""
-		return True if self.organization_users.filter(user=user, is_admin=True) else False
+		return True if OrganizationUser.objects.filter(organization=self,user__in=[user], is_admin=True) else False
 
 	def is_owner(self, user):
 		"""
 		Returns True is user is the organization's owner, otherwise false
 		"""
-		return self.owner.organization_user.user == user
+		try:
+			return self.owner.organization_user.user == user
+		except:
+			return False
+
+	def save(self, *args, **kwargs):
+		if not Organization.objects.filter(main_organization=True):
+			self.main_organization = True
+		else:
+			self.main_organization= False
+		super(Organization, self).save()
 
 class OrganizationUser(BaseModel):
 
@@ -110,3 +126,20 @@ class OrganizationOwner(BaseModel):
 
 	def __str__(self):
 		return f"{self.organization.name} {self.organization_user.user.name}"
+
+class OrganizationFileManager(BaseManager):
+	pass
+
+class OrganizationFile(BaseFileModel):
+
+	organization = models.ForeignKey(
+		Organization,
+		on_delete=models.CASCADE,
+		verbose_name='Organization',
+		related_name='organization_files'
+	)
+
+	date = models.DateTimeField(auto_now=False)
+
+	def __str__(self):
+		return f"{self.title}, {self.organization}"

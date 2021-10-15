@@ -23,12 +23,14 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 	'import_export',
     'rest_framework',
+	'rest_framework_simplejwt.token_blacklist',
+	'base',
+	'files',
     'customuser',
 	'organization',
 	'note',
 	'warehouse',
-	'bone',
-	'supplier',
+	'tissue',
 ]
 
 MIDDLEWARE = [
@@ -46,32 +48,33 @@ MIDDLEWARE = [
 	'core.organization_middleware.OrganizationDetailMiddleware',
 	'core.get_request.RequestMiddleware',
 ]
+JS_TIMESTAMP = '%s000' #microsecond
+JS_TIMESTAMP_INPUT = '%s000' #second
 
 REST_FRAMEWORK = {
-    # Use Django's standard `django.contrib.auth` permissions,
-    # or allow read-only access for unauthenticated users.
+	'DATETIME_FORMAT': JS_TIMESTAMP,
+	'DATE_FORMAT': JS_TIMESTAMP,
+	'DATE_INPUT_FORMATS': JS_TIMESTAMP_INPUT,
+	'DATETIME_INPUT_FORMATS': JS_TIMESTAMP_INPUT,
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
         'rest_framework.permissions.AllowAny',
-        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     ],
 
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',
         'rest_framework.renderers.TemplateHTMLRenderer',
-
     ],
 
     'DEFAULT_AUTHENTICATION_CLASSES': (
+		'rest_framework_simplejwt.authentication.JWTAuthentication',
 		'rest_framework.authentication.TokenAuthentication',
 		'rest_framework.authentication.SessionAuthentication',
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-
     ),
 
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 20
+    'DEFAULT_PAGINATION_CLASS': 'core.pagination.CountPostPagination',
+    'PAGE_SIZE': 20,
 }
 
 
@@ -102,10 +105,9 @@ SIMPLE_JWT = {
 }
 
 CORS_ORIGIN_WHITELIST = [
-	'http://orbone.apasplustest.com',
 	'https://orbone.apasplustest.com',
 ]
-
+CSRF_TRUSTED_ORIGINS = ['https//orbone.apasplustest.com']
 
 CORS_ALLOW_HEADERS = [
 	'accept',
@@ -189,7 +191,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
-LANGUAGE_CODE = 'tr-TR'
+LANGUAGE_CODE = 'en-EN'
 
 TIME_ZONE = 'Europe/Istanbul'
 
@@ -220,5 +222,5 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = 'info@apasplus.com'
 EMAIL_HOST_PASSWORD = '9870Qazwsx'
 
-API_URL = 'https://orback.apasplustest.com'
+API_URL = 'https://orback.apasplustest.com/'
 CLIENT_URL = 'https://orbone.apasplustest.com'
