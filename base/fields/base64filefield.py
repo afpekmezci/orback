@@ -6,7 +6,8 @@ import uuid
 import imghdr
 import mimetypes
 from rest_framework import serializers
-from core.settings import API_URL
+
+
 class Base64FileField(serializers.FileField):
 
 	def to_representation(self, value):
@@ -17,7 +18,7 @@ class Base64FileField(serializers.FileField):
 			except Exception:
 				raise OSError("Error encoding file")
 		else:
-			return f"{API_URL}staticfile{value.url}"
+			return None
 
 	def to_internal_value(self, data):
 

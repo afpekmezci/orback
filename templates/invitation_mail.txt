@@ -1,0 +1,1 @@
+Sayın {{ name }} {{ organization_name }} Firması sizi Orbone'a ekledi. {{mail}} E-Posta adresi ile Orbone'a giriş yapabilirsiniz.

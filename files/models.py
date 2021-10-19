@@ -10,7 +10,7 @@ class BaseFileModel(BaseModel):
 		AUTH_USER_MODEL,
 		on_delete=models.CASCADE,
 		verbose_name="Created By",
-		related_name="user_files",
+		related_name="%(app_label)s_%(class)s",
 	)
 
 	title = models.CharField(verbose_name="Title", max_length=128)

@@ -16,7 +16,7 @@ from django.views.static import serve
 admin_url = [
     path('admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls')),
-    path('staticfile/images/<str:filename>/', FileServe.as_view()),
+    path('servefiles/images/<str:filename>/', FileServe.as_view()),
 ]
 
 token_urls = [

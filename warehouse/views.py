@@ -8,7 +8,7 @@ from organization.permissions import IsOwnerOrReadOnly, IsMainOrganization, IsOr
 
 class CreateHospitalView(generics.CreateAPIView):
 	model = Hospital
-	permission_classes = (HasOrgPermission, IsMainOrganization)
+	permission_classes = (HasOrgPermission,)
 	serializer_class = HospitalSerializer
 	queryset = model.objects.all()
 
@@ -23,7 +23,7 @@ class ListHospitalView(FilterAPIView):
 
 class UpdateHospitalView(generics.UpdateAPIView):
 	model = Hospital
-	permission_classes = (HasOrgPermission, IsMainOrganization)
+	permission_classes = (HasOrgPermission, )
 	serializer_class = HospitalSerializer
 	queryset = model.objects.all()
 

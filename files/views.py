@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework import generics
 from rest_framework.generics import GenericAPIView, mixins
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from base.views import FilterAPIView
+from base.views import FilterAPIView, PatchAPIView
 from organization.permissions import IsOwnerOrReadOnly, IsMainOrganization, IsOrgPersonelOrgMainOrg, HasOrgPermission
 from files.models import BaseFileModel
 from files.serializers import BaseFileSerializer
@@ -14,6 +14,9 @@ import urllib
 
 class FileDetailView(mixins.RetrieveModelMixin,
                       GenericAPIView):
+	model = None
+	queryset = None
+
 	permission_classes = (HasOrgPermission, )
 	serializer_class = BaseFileSerializer
 
@@ -27,35 +30,50 @@ class FileDetailView(mixins.RetrieveModelMixin,
 			'view': self,
 			'detail': True
 		}
-
+from django.contrib.auth.models import AnonymousUser
+from rest_framework.response import Response
+from rest_framework import status
 class FileServe(APIView):
 	permission_classes = [AllowAny]
 	def get(self, request, filename):
+		"""
+		 File Preview İçin Static olarak dosyaları servis eder.
+		 Güvenlik için Sadece google docs üzerinden gelen istekleri yanıtlar.
+		"""
+		if not 'google' in request._request.environ.get('HTTP_USER_AGENT'):
+			return Response(status=status.HTTP_404_NOT_FOUND)
 		path = f"images/{filename}"
 		short_report = open(path, 'rb')
 		url = urllib.request.pathname2url(path)
 		mime_type = mimetypes.guess_type(url)[0]
-		print('MIME TYPE : ', mime_type)
 		response = HttpResponse(FileWrapper(short_report), content_type=mime_type)
-		return response
 		return response
 
 class CreateFileView(generics.CreateAPIView):
+	model = None
+	queryset = None
 	permission_classes = (HasOrgPermission, )
 	serializer_class = BaseFileSerializer
 
 class ListFileView(FilterAPIView):
+	model = None
+	queryset = None
 	permission_classes = (HasOrgPermission,)
 	serializer_class = BaseFileSerializer
 	search_fields = ['title', 'desc']
 
 
-class UpdateFileView(generics.UpdateAPIView):
+class UpdateFileView(PatchAPIView):
+	model = None
+	queryset = None
 	permission_classes = (HasOrgPermission, )
 	serializer_class = BaseFileSerializer
 
 
 class DeleteFileView(generics.DestroyAPIView):
+	model = None
+	queryset = None
+
 	permission_classes = (HasOrgPermission,)
 	serializer_class = BaseFileSerializer
 

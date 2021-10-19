@@ -1,15 +1,17 @@
 from django.db import models
 from base.models import BaseModel, BaseModelWithOrganization
 from tissue.units import TissueStatus
+from files.models import BaseFileModel
+from base.managers import BaseManager
 
 
 class TissueType(BaseModel):
 
-	title = models.CharField(verbose_name='Title', max_length=128)
+	name = models.CharField(verbose_name='Title', max_length=128)
 	desc = models.CharField(verbose_name='Description', max_length=2048, blank=True, null=True)
 
 	def __str__(self):
-		return self.title
+		return self.name
 
 
 class TissueMaterial(BaseModelWithOrganization):
@@ -22,3 +24,21 @@ class TissueMaterial(BaseModelWithOrganization):
 	delivery_time = models.DateTimeField(blank=True, null=True, auto_now=False, verbose_name='Delivery Time')
 	def __str__(self):
 		return f"{self.tissue_type} {self.organization} {self.hospital}"
+
+
+class TissueFile(BaseFileModel):
+
+	tissue = models.ForeignKey(
+		TissueMaterial,
+		on_delete=models.CASCADE,
+		verbose_name='Organization',
+		related_name='tissue_files'
+	)
+
+	date = models.DateTimeField(auto_now=False)
+
+	objects = BaseManager()
+
+	def __str__(self):
+		return f"{self.title}, {self.tissue}"
+

@@ -1,11 +1,5 @@
 from django.urls import path
 
-from note.viewsets import (
-	NoteListView,
-	NoteCreateView,
-	NoteDetailView,
-	NoteUpdateViewSet
-)
 from tissue.views import (
 	TissueTypeListView,
 	AddTissueTypeView,
@@ -16,14 +10,22 @@ from tissue.views import (
 	TissueMaterialDetail,
 	UpdateTissueMaterial,
 	DeleteTissueMaterial,
+	TransferTissueView
+)
+from tissue.files_views import (
+	TissueFileList,
+	TissueFileCreate,
+	TissueFileDetail,
+	TissueFileUpdate,
+	TissueFileDelete,
 )
 
-
 note_urls = [
-     path("note/list/", NoteListView.as_view(), name="list"),
-     path("note/create/", NoteCreateView.as_view(), name="create"),
-     path("note/detail/<int:id>/", NoteDetailView.as_view(), name="detail"),
-     path("note/update/<int:id>/", NoteUpdateViewSet.as_view(), name="update"),
+     path("file/list/", TissueFileList.as_view(), name="list"),
+     path("file/create/", TissueFileCreate.as_view(), name="create"),
+     path("file/detail/<int:pk>/", TissueFileDetail.as_view(), name="detail"),
+     path("file/update/<int:pk>/", TissueFileUpdate.as_view(), name="update"),
+     path("file/delete/<int:pk>/", TissueFileDelete.as_view(), name="delete_file"),
 ]
 
 material_urls = [
@@ -32,6 +34,7 @@ material_urls = [
 	path("updatematerial/<int:pk>/", UpdateTissueMaterial.as_view(), name="UpdateTissueMaterial"),
 	path("deletematerial/<int:pk>/", DeleteTissueMaterial.as_view(), name="DeleteTissueMaterial"),
 	path("listmaterials/", ListMaterialView.as_view(), name="ListMaterialGroup"),
+	path("transfer/", TransferTissueView.as_view(), name="TransferTissue"),
 ]
 
 bone_type_urls = [

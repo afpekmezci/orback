@@ -7,11 +7,20 @@ from organization.views import (
 	RemoveUserFromOrganization,
 	OrganizationUserList,
 	SupplierListView,
+)
+
+from organization.files_views import (
 	OrganizationFileList,
 	OrganizationFileCreate,
 	OrganizationFileDetail,
 	OrganizationFileUpdate,
-	OrganizationFileDelete
+	OrganizationFileDelete,
+
+	OrganizationUserFileList,
+	OrganizationUserFileCreate,
+	OrganizationUserFileDetail,
+	OrganizationUserFileUpdate,
+	OrganizationUserFileDelete
 )
 
 
@@ -19,8 +28,14 @@ file_urls = [
 	path("file/list/", OrganizationFileList.as_view(), name="ListOrganizationFiles"),
 	path("file/create/", OrganizationFileCreate.as_view(), name="CreateOrganizationFiles"),
 	path("file/detail/<int:pk>/", OrganizationFileDetail.as_view(), name="OrganizationFileDetail"),
-	path("file/update/<int:pk>/", OrganizationFileUpdate.as_view(), name="UpdateFile"),
-	path("file/delete/<int:pk>/", OrganizationFileDelete.as_view(), name="DeleteFile"),
+	path("file/update/<int:pk>/", OrganizationFileUpdate.as_view(), name="OrganizationUpdateFile"),
+	path("file/delete/<int:pk>/", OrganizationFileDelete.as_view(), name="OrganizationDeleteFile"),
+
+	path("userfile/list/", OrganizationUserFileList.as_view(), name="ListOrganizationUserFiles"),
+	path("userfile/create/", OrganizationUserFileCreate.as_view(), name="CreateOrganizationUserFiles"),
+	path("userfile/detail/<int:pk>/", OrganizationUserFileDetail.as_view(), name="OrganizationUserFileDetail"),
+	path("userfile/update/<int:pk>/", OrganizationUserFileUpdate.as_view(), name="OrganizationUserUpdateFile"),
+	path("userfile/delete/<int:pk>/", OrganizationUserFileDelete.as_view(), name="OrganizationUserDeleteFile"),
 ]
 
 urlpatterns = file_urls + [

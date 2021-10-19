@@ -1,0 +1,1 @@
+Sayın {{ name }} Orbona'a hoşgeldiniz. Email : {{ mail }}, Şifre : {{password}} ile hesabınıza giriş yapabilirsiniz.

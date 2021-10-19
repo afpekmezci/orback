@@ -16,20 +16,18 @@ def get_annotation(key):
 class FilterAPIView(mixins.ListModelMixin, GenericAPIView):
 
 	def post(self, request, *args, **kwargs):
-
-		self.queryset = self.queryset.filter(is_active=True)
-
 		_filter = Q()
-
 		for filter_fields, filter_value in self.request.data.get('filter', {}).items():
+			print(filter_fields, filter_value)
 
 			for model_key in self.model._meta.fields:
-				if model_key.name == filter_fields and filter_value:
+				if model_key.name == filter_fields and filter_value is not None:
 					if isinstance(filter_value, list):
 						_filter &= Q(**{"%s__in" % model_key.name: filter_value})
 					else:
 						_filter &= Q(**{"%s" % model_key.name: filter_value})
 
+		print('filter : ', _filter)
 		_search = Q()
 
 		if hasattr(self, 'search_fields') and self.search_fields and self.request.data.get('search'):
@@ -39,7 +37,8 @@ class FilterAPIView(mixins.ListModelMixin, GenericAPIView):
 			self.queryset = self.queryset.filter(_search)
 
 		self.queryset = self.queryset.filter(_filter)
-
+		if hasattr(self, 'order_by'):
+			self.queryset = self.queryset.order_by(self.order_by)
 		if not self.queryset:
 			return Response(status=status.HTTP_404_NOT_FOUND)
 		return self.list(request, *args, **kwargs)

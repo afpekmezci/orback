@@ -8,7 +8,8 @@ import pytz
 from pytz import timezone
 import time
 from datetime import datetime, timedelta
-
+import requests
+import json
 class TimeUtils:
 
 	def recalculate_time_wtih_tz(self, stamp, zone=None):
@@ -103,4 +104,20 @@ class ImageUtils:
 					mime_type = ""
 			img_to_base64 = base64.b64encode(image.read()).decode("utf-8")
 			return f"data:{mime_type};base64,{img_to_base64}"
+
+
+
+class SendSms:
+	def send(self, mesaj, number):
+
+		if str(number)[0] != "0":
+			number = f"0{number}"
+		print('Number : ', number)
+
+		string = (
+				"<request><authentication><username>5326337543</username><password>9870qazwsx</password></authentication><order><sender>APASPLUS</sender><sendDateTime></sendDateTime><message><text><![CDATA[%s]]></text><receipents><number>%s</number></receipents></message></order></request>"
+				% (mesaj, number)
+		)
+
+		requests.post("http://api.iletimerkezi.com/v1/send-sms", data={"data": string})
 

@@ -6,14 +6,14 @@ from customuser.utils import generate_random_password, send_register_mail
 from base.models import BaseModel
 
 class UserManager(BaseUserManager):
-	def create_user(self, email, name):
+	def create_user(self, email, name, phone=None):
 
 		if not email:
 			raise ValueError("E-Posta adresi girilmesi zorunludur")
 
 		email = email.lower()
 
-		user = self.model(email=self.normalize_email(email), name=name, is_active=True)
+		user = self.model(email=self.normalize_email(email), name=name, phone=phone, is_active=True)
 
 		password = generate_random_password(8)
 		user.set_password(password)
@@ -60,7 +60,7 @@ class User(AbstractUser):
 	)
 
 	name = models.CharField(verbose_name='İsim', max_length=64)
-
+	phone = models.CharField(verbose_name='Phone', max_length=13, unique=True, null=True, blank=True)
 	is_first = models.BooleanField(verbose_name='is first', default=True)
 
 	person_image = models.ImageField(

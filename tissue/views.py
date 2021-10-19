@@ -1,3 +1,5 @@
+import datetime
+
 from django.shortcuts import render
 from rest_framework import generics
 from base.views import FilterAPIView, DeleteAPIView, PatchAPIView
@@ -13,6 +15,8 @@ from rest_framework.generics import GenericAPIView, mixins
 from rest_framework.response import Response
 from rest_framework import status
 import pandas as pd
+from rest_framework.views import APIView
+from core.utils import TimeUtils
 
 class TissueTypeListView(FilterAPIView):
 	permission_class = [HasOrgPermission]
@@ -22,13 +26,13 @@ class TissueTypeListView(FilterAPIView):
 	search_fields = ['title', 'desc']
 
 class AddTissueTypeView(generics.CreateAPIView):
-	permission_classes = [HasOrgPermission, IsMainOrganization]
+	permission_classes = [HasOrgPermission,] #IsMainOrganization
 	model = TissueType
 	queryset = TissueType.objects.all()
 	serializer_class = TissueTypeSerializer
 
 class UpdateTissueTypeView(generics.UpdateAPIView):
-	permission_classes = [HasOrgPermission, IsMainOrganization]
+	permission_classes = [HasOrgPermission,] #IsMainOrganization
 	model = TissueType
 	queryset = TissueType.objects.all()
 	serializer_class = TissueTypeSerializer
@@ -61,11 +65,15 @@ class TissueMaterialDetail(generics.RetrieveAPIView):
 	queryset = TissueMaterial.objects.all()
 	serializer_class = BonseMaterialSerializer
 
-class DeleteTissueMaterial(DeleteAPIView):
+class DeleteTissueMaterial(generics.DestroyAPIView):
 	permission_classes = [HasOrgPermission, TissueMaterialPermission]
 	model = TissueMaterial
 	queryset = TissueMaterial.objects.all()
 	serializer_class = BonseMaterialSerializer
+
+	def perform_destroy(self, instance):
+		instance.is_deleted=True
+		instance.save()
 
 class ListMaterialView(mixins.ListModelMixin, GenericAPIView):
 	permission_classes = [HasOrgPermission, TissueMaterialPermission]
@@ -89,16 +97,17 @@ class ListMaterialView(mixins.ListModelMixin, GenericAPIView):
 		self.get_queryset()
 		if not self.queryset:
 			return Response(status=status.HTTP_404_NOT_FOUND)
-		if not self._detail:
 
+		if not self._detail:
 			response = {
 				'count': self.get_count(),
 				'results': self.queryset,
 				'aggregate_key': self.aggregate_key
 			}
 			return Response(response)
-
+		self.queryset = self.queryset.order_by('-taken_time')
 		page = self.paginate_queryset(self.queryset)
+
 		if page is not None:
 			serializer = self.get_serializer(page, many=True)
 			resp = self.get_paginated_response(serializer.data)
@@ -123,7 +132,6 @@ class ListMaterialView(mixins.ListModelMixin, GenericAPIView):
 		if hasattr(self, 'search_fields') and self.search_fields and self.request.data.get('search'):
 			for item in self.search_fields:
 				self._search |= Q(**{"%s__icontains" % item: self.request.data.get('search')})
-
 
 	def get_annotation(self, key):
 		f_key = f"{key}__name"
@@ -154,8 +162,7 @@ class ListMaterialView(mixins.ListModelMixin, GenericAPIView):
 						),
 					)
 				).annotate(**self.get_annotation(self.aggregate_key))
-			.order_by(self.aggregate_key))
-
+			.order_by('-fridge'))
 
 	def get_queryset(self):
 		self._detail = self.request.data.get('detail', False)
@@ -176,3 +183,40 @@ class ListMaterialView(mixins.ListModelMixin, GenericAPIView):
 				'transfer': sum(item['transfer'] for item in self.queryset),
 				'fridge': sum(item['fridge'] for item in self.queryset),
 			}
+
+class TransferTissueView(APIView):
+	permission_classes = [HasOrgPermission, TissueMaterialPermission]
+	model = TissueMaterial
+	queryset = TissueMaterial.objects.all()
+	serializer_class = BonseMaterialSerializer
+	def post(self, request, *args, **kwargs):
+		_data = self.request.data
+		many = False
+		if isinstance(_data, list):
+			many = True
+		instances = []
+		if many:
+			for item in _data:
+				instance = self.update_data(item)
+				instances.append(instance)
+		else:
+			instances = self.update_data(_data)
+		serialized = self.serializer_class(instances, many=many)
+		return Response(serialized.data, status=status.HTTP_200_OK)
+
+	def update_data(self, item):
+
+		instance = self.model.objects.get(id__exact=item.get('id'))
+		instance.status = item.get('status')
+
+		_date = item.get('date')
+		if _date:
+			_date = int(_date / 1000)
+		if not _date:
+			_date = datetime.datetime.now()
+		if instance.status == TissueStatus.transfer:
+			instance.transfer_time = TimeUtils().recalculate_time_wtih_tz(_date)
+		elif instance.status == TissueStatus.orbone:
+			instance.delivery_time = TimeUtils().recalculate_time_wtih_tz(_date)
+		instance.save()
+		return instance

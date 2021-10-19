@@ -1,19 +1,14 @@
 from django.shortcuts import render
 from rest_framework import generics
-from organization.models import Organization, OrganizationUser, OrganizationOwner, OrganizationFile
-from organization.serializers import OrganizationSerializer, OrganizationUserSerializer, OrganizationFileSerializer
+from organization.models import Organization, OrganizationUser, OrganizationOwner
+from organization.serializers import OrganizationSerializer, OrganizationUserSerializer
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework import status
 from base.views import FilterAPIView
 from organization.permissions import IsOwnerOrReadOnly, IsMainOrganization, IsOrgPersonelOrgMainOrg, HasOrgPermission
-from files.views import (
-	FileDetailView,
-	CreateFileView,
-	ListFileView,
-	UpdateFileView,
-	DeleteFileView
-)
+
+from django.db.models import Q
 
 class CreateOrganizationView(generics.CreateAPIView):
 	permission_classes = (HasOrgPermission, IsMainOrganization)
@@ -48,6 +43,9 @@ class SupplierListView(FilterAPIView):
 	queryset = model.objects.all()
 	serializer_class = OrganizationSerializer
 	search_fields = ['name', 'city']
+	filter_fields = ['is_active', 'organization']
+	order_by = 'name'
+
 
 class AddUserToOrganizationView(generics.CreateAPIView):
 	permission_classes = (HasOrgPermission, IsOwnerOrReadOnly)
@@ -57,6 +55,7 @@ class AddUserToOrganizationView(generics.CreateAPIView):
 	def get_serializer_class(self):
 		self.request.data['organization'] = self.request.org.id
 		return super(AddUserToOrganizationView, self).get_serializer_class()
+
 class RemoveUserFromOrganization(generics.DestroyAPIView):
 	permission_classes = (HasOrgPermission, IsOwnerOrReadOnly)
 	model = OrganizationUser
@@ -74,42 +73,18 @@ class OrganizationUserList(FilterAPIView):
 	queryset = model.objects.all()
 	serializer_class = OrganizationUserSerializer
 	search_fields = ['user__name', 'user__email']
+	filter_fields = ['is_active', 'organization']
 
 	def get_queryset(self):
+		_filter = Q(organization__exact=self.request.org)
+		if (
+			self.request.org.main_organization and
+			(
+				self.request.data.get('filter', {}).get('show_all') or
+				self.request.data.get('filter', {}).get('organization')
+			)
+		):
+			_filter = Q()
+		return self.queryset.filter(_filter)
 
-		print('QUERYSET : ' , self.queryset)
 
-		return self.queryset.filter(organization__exact=self.request.org)
-
-
-class OrganizationFileList(FilterAPIView):
-	model = OrganizationFile
-	serializer_class=OrganizationFileSerializer
-	queryset = model.objects.all()
-	search_fields = ['name', 'desc', 'organization__name']
-	filter_fields = ['organization']
-	def get_queryset(self):
-		super(OrganizationFileList, self).get_queryset()
-		queryset = self.queryset
-		if not self.request.org.main_organization:
-			queryset = self.queryset.filter(organization__exact=self.request.org)
-		return queryset
-class OrganizationFileCreate(CreateFileView):
-	model = OrganizationFile
-	serializer_class=OrganizationFileSerializer
-	queryset = model.objects.all()
-
-class OrganizationFileDetail(FileDetailView):
-	model = OrganizationFile
-	serializer_class=OrganizationFileSerializer
-	queryset = model.objects.all()
-
-class OrganizationFileUpdate(UpdateFileView):
-	model = OrganizationFile
-	serializer_class=OrganizationFileSerializer
-	queryset = model.objects.all()
-
-class OrganizationFileDelete(DeleteFileView):
-	model = OrganizationFile
-	serializer_class=OrganizationFileSerializer
-	queryset = model.objects.all()

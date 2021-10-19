@@ -39,8 +39,6 @@ class Organization(BaseModel):
 			OrganizationOwner.objects.create(organization=self,
 												 organization_user=org_user)
 
-		send_invitation_mail(user, self.name)
-
 		return org_user
 
 	def remove_user(self, user):
@@ -140,6 +138,20 @@ class OrganizationFile(BaseFileModel):
 	)
 
 	date = models.DateTimeField(auto_now=False)
+	objects = BaseManager()
+	def __str__(self):
+		return f"{self.title}, {self.organization}"
 
+class OrganizationUserFile(BaseFileModel):
+
+	organization_user = models.ForeignKey(
+		OrganizationUser,
+		on_delete=models.CASCADE,
+		verbose_name='Organization',
+		related_name='organization_user_files'
+	)
+
+	date = models.DateTimeField(auto_now=False)
+	objects = BaseManager()
 	def __str__(self):
 		return f"{self.title}, {self.organization}"
