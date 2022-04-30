@@ -4,7 +4,6 @@ import datetime
 import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SECRET_KEY = 'django-insecure-d9ln00d1)_na2p-4t95mpaz=f&_og+&_5j0z7#y=6e+clkr+fx'
 
 DEBUG = True
 
@@ -214,13 +213,6 @@ AUTH_USER_MODEL = 'customuser.User'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_USE_TLS = True
-EMAIL_PORT = 587
-EMAIL_HOST_USER = 'info@apasplus.com'
-EMAIL_HOST_PASSWORD = '9870Qazwsx'
 
 API_URL = 'https://orback.apasplustest.com/'
 CLIENT_URL = 'https://orbone.apasplustest.com'
